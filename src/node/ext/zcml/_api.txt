@@ -1,0 +1,245 @@
+agx.io.zcml
+===========
+
+Import nodes.
+::
+
+    >>> from agx.io.zcml import ZCMLNode
+    >>> from agx.io.zcml import ZCMLFile
+    >>> from agx.io.zcml import SimpleDirective
+    >>> from agx.io.zcml import ComplexDirective
+
+Testdata directory.
+::
+
+    >>> datadir
+    '.../agx.io.zcml/src/agx/io/zcml/tests/data'
+
+Parse ZCML file
+---------------
+
+Read existing zcml file.
+::
+
+    >>> import os
+    >>> existingpath = os.path.join(datadir, 'configure.zcml')
+    >>> existingpath
+    '.../agx.io.zcml/src/agx/io/zcml/tests/data/configure.zcml'
+    
+    >>> zcml = ZCMLFile(existingpath)
+
+Check NSMAP.
+::
+
+    >>> zcml.nsmap
+    {None: 'http://namespaces.zope.org/zope', 
+    'cmf': 'http://namespaces.zope.org/cmf', 
+    'five': 'http://namespaces.zope.org/five', 
+    'zcml': 'http://namespaces.zope.org/zcml', 
+    'browser': 'http://namespaces.zope.org/browser'}
+
+Check parsed Tree.
+::
+
+    >>> zcml.printtree()
+    <class 'agx.io.zcml._api.ZCMLFile'>: None
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.ComplexDirective'>: ...
+        <class 'agx.io.zcml._api.SimpleDirective'>: ...
+
+Query ZCML nodes
+----------------
+
+Check ``filter`` function.
+::
+
+    >>> zcml.filter()
+    []
+
+Filter by tag name.
+::
+
+    >>> zcml.filter(tag='browser:page')
+    [<SimpleDirective object '...' at ...>]
+    
+    >>> zcml.filter(tag='include')
+    [<SimpleDirective object '...' at ...>, 
+    <SimpleDirective object '...' at ...>]
+
+Filter by tag name and attribute name.
+::
+
+    >>> zcml.filter(tag='include', attr='file')
+    [<SimpleDirective object '...' at ...>]
+
+Filter by tagname, attribute name and attribute value.
+::
+
+    >>> zcml.filter(tag='include', attr='file', value='inexistent')
+    []
+    
+    >>> zcml.filter(tag='include', attr='file', value='foo.zcml')
+    [<SimpleDirective object '...' at ...>]
+    
+    >>> zcml.filter(tag='browser:page', attr='browser:name', value='foo')
+    [<SimpleDirective object '...' at ...>]
+
+Filter function does not work recusrive.
+::
+
+    >>> zcml.filter(tag='class')
+    [<ComplexDirective object '...' at ...>]
+    
+    >>> zcml.filter(tag='implements')
+    []
+    
+    >>> zcml.filter(tag='class')[0].filter(tag='implements')
+    [<SimpleDirective object '...' at ...>]
+
+Write ZCML file
+---------------
+
+Change outpath of already parsed ZCML and dump. Outpath defaults to given
+path at __init__ time.
+::
+
+    >>> zcml.outpath = os.path.join(datadir, 'dumped.configure.zcml')
+    >>> zcml()
+
+Create ZCML file
+----------------
+
+Path for our new file.
+::
+
+    >>> outpath = os.path.join(datadir, 'new.zcml')
+
+Delete outfile if present due to prior test run.
+::
+
+    >>> try:
+    ...     os.remove(outpath)
+    ... except OSError, e:
+    ...     pass
+
+NSMAP to use. Note that you can only define namspaces due to File creation.
+::
+
+    >>> nsmap = {
+    ...     None: 'http://namespaces.zope.org/zope',
+    ...     'browser': 'http://namespaces.zope.org/browser',
+    ... }
+
+Create new ZCML.
+::
+
+    >>> zcml = ZCMLFile(outpath, nsmap=nsmap)
+    >>> zcml.printtree()
+    <class 'agx.io.zcml._api.ZCMLFile'>: None
+
+Only accepts IZCMLNode implementations.
+::
+
+    >>> zcml['foo'] = object()
+    Traceback (most recent call last):
+      ...
+    ValueError: Invalid value <object object at ...>
+
+Add simple directives.
+::
+
+    >>> simple = SimpleDirective(name='utility', parent=zcml)
+    >>> simple.attrs['factory'] = 'foo.Bar'
+    
+    >>> simple = SimpleDirective(name='browser:page', parent=zcml)
+    >>> simple.attrs['for'] = '*'
+    >>> simple.attrs['name'] = 'somename'
+    >>> simple.attrs['template'] = 'somename.pt'
+    >>> simple.attrs['permission'] = 'zope.Public'
+    
+    >>> zcml.printtree()
+    <class 'agx.io.zcml._api.ZCMLFile'>: None
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+
+Add complex directive.
+::
+    
+    >>> complex = ComplexDirective(name='class', parent=zcml)
+    >>> complex.attrs['class'] = '.foo.Bar'
+    >>> sub = SimpleDirective(name='implements', parent=complex)
+    >>> sub.attrs['interface'] = '.interfaces.IBar'
+
+Simple directives cannot contain children.
+
+    >>> sub['foo'] = SimpleDirective(name='fail', parent=sub)
+    Traceback (most recent call last):
+      ...
+    NotImplementedError: Cannot add children to SimpleDirective.
+
+Write ZCML file and check contents.
+::
+
+    >>> zcml()
+    >>> file = open(outpath, 'r')
+    >>> for line in file.readlines():
+    ...     print line
+    <?xml version="1.0" encoding="UTF-8"?>
+    <BLANKLINE>
+    <configure
+    <BLANKLINE>
+        xmlns:browser="http://namespaces.zope.org/browser"
+    <BLANKLINE>
+        xmlns="http://namespaces.zope.org/zope">
+    <BLANKLINE>
+      <utility factory="foo.Bar"/>
+    <BLANKLINE>
+      <browser:page
+    <BLANKLINE>
+          for="*"
+    <BLANKLINE>
+          name="somename"
+    <BLANKLINE>
+          template="somename.pt"
+    <BLANKLINE>
+          permission="zope.Public"/>
+    <BLANKLINE>
+      <class class=".foo.Bar">
+    <BLANKLINE>
+        <implements interface=".interfaces.IBar"/>
+    <BLANKLINE>
+      </class>
+    <BLANKLINE>
+    </configure>
+    
+    >>> file.close()
+
+Modify ZCML file
+----------------
+
+Use already created ZCML file to modify.
+
+Add another ZCML node.
+::
+
+    >>> simple = SimpleDirective(name='adapter', parent=zcml)
+    >>> simple.attrs['for'] = 'interfaces.IBar'
+    >>> simple.attrs['name'] = 'myadapter'
+    >>> simple.attrs['factory'] = '.foobar.FooBarAdapter'
+    
+    >>> zcml.printtree()
+    <class 'agx.io.zcml._api.ZCMLFile'>: None
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.ComplexDirective'>: ...
+        <class 'agx.io.zcml._api.SimpleDirective'>: ...
+      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+    
+    >>> toremove = zcml.filter(tag='utility')[0]
+    >>> del zcml[toremove.uuid]
+    
+    >>> zcml.outpath = os.path.join(datadir, 'modified.zcml')
+    >>> zcml()

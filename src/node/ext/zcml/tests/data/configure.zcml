@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+	xmlns:zcml="http://namespaces.zope.org/zcml"
+	xmlns:browser="http://namespaces.zope.org/browser"
+	xmlns:five="http://namespaces.zope.org/five"
+	xmlns:cmf="http://namespaces.zope.org/cmf"
+	i18n_domain="agx.example">
+	
+	<include package="foo.bar" />
+	<include file="foo.zcml" />
+	
+	<utility factory=".foo.Bar" />
+	
+	<browser:page
+		for="*"
+		name="foo"
+		class=".foo.Baz"
+		template="foo.pt"
+		permission="zope.Public"
+    />
+	
+	<class class=".foo.Baz">
+		<implements interface=".interfaces.IBaz" />
+	</class>
+
+</configure>
