@@ -8,7 +8,7 @@ version = '1.0'
 shortdesc ="AGX ZCML Input/Output"
 longdesc = open(os.path.join(os.path.dirname(__file__), 'README.txt')).read()
 
-setup(name='agx.io.zcml',
+setup(name='node.ext.zcml',
       version=version,
       description=shortdesc,
       long_description=longdesc,
@@ -25,12 +25,12 @@ setup(name='agx.io.zcml',
       license='GNU General Public Licence',
       packages=find_packages('src'),
       package_dir = {'': 'src'},
-      namespace_packages=['agx', 'agx.io'],
+      namespace_packages=['node', 'node.ext'],
       include_package_data=True,
       zip_safe=False,
       install_requires=[
           'setuptools',
-          'agx.io.xml',
+          'node.ext.xml',
           # -*- Extra requirements: -*
       ],
       extras_require = dict(

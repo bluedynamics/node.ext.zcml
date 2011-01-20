@@ -4,9 +4,9 @@
 from zope.interface import implements
 from zodict import Node
 from zope.component import getUtility
-from agx.io.xml.interfaces import IXMLFactory
-from agx.io.xml import XMLNode
-from agx.io.zcml.interfaces import (
+from node.ext.xml.interfaces import IXMLFactory
+from node.ext.xml import XMLNode
+from node.ext.zcml.interfaces import (
     IZCMLNode,
     IZCMLFile,
     ISimpleDirective,
@@ -14,7 +14,7 @@ from agx.io.zcml.interfaces import (
 )
 
 class ZCMLAttrs(object):
-    """XXX: move this to agx.io.xml. and rename to XMLAttributes.
+    """XXX: move this to node.ext.xml. and rename to XMLAttributes.
     """
     
     def __init__(self, model):

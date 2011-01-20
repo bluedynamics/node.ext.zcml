@@ -1,0 +1,5 @@
+*.pyc
+*.pyo
+src/node.ext.zcml.egg-info
+src/node/ext/zcml/tests/data/modified.zcml
+src/node/ext/zcml/tests/data/new.zcml

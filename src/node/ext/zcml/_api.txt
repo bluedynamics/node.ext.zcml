@@ -1,19 +1,19 @@
-agx.io.zcml
+node.ext.zcml
 ===========
 
 Import nodes.
 ::
 
-    >>> from agx.io.zcml import ZCMLNode
-    >>> from agx.io.zcml import ZCMLFile
-    >>> from agx.io.zcml import SimpleDirective
-    >>> from agx.io.zcml import ComplexDirective
+    >>> from node.ext.zcml import ZCMLNode
+    >>> from node.ext.zcml import ZCMLFile
+    >>> from node.ext.zcml import SimpleDirective
+    >>> from node.ext.zcml import ComplexDirective
 
 Testdata directory.
 ::
 
     >>> datadir
-    '.../agx.io.zcml/src/agx/io/zcml/tests/data'
+    '.../node.ext.zcml/src/agx/io/zcml/tests/data'
 
 Parse ZCML file
 ---------------
@@ -24,7 +24,7 @@ Read existing zcml file.
     >>> import os
     >>> existingpath = os.path.join(datadir, 'configure.zcml')
     >>> existingpath
-    '.../agx.io.zcml/src/agx/io/zcml/tests/data/configure.zcml'
+    '.../node.ext.zcml/src/agx/io/zcml/tests/data/configure.zcml'
     
     >>> zcml = ZCMLFile(existingpath)
 
@@ -42,13 +42,13 @@ Check parsed Tree.
 ::
 
     >>> zcml.printtree()
-    <class 'agx.io.zcml._api.ZCMLFile'>: None
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.ComplexDirective'>: ...
-        <class 'agx.io.zcml._api.SimpleDirective'>: ...
+    <class 'node.ext.zcml._api.ZCMLFile'>: None
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.ComplexDirective'>: ...
+        <class 'node.ext.zcml._api.SimpleDirective'>: ...
 
 Query ZCML nodes
 ----------------
@@ -138,7 +138,7 @@ Create new ZCML.
 
     >>> zcml = ZCMLFile(outpath, nsmap=nsmap)
     >>> zcml.printtree()
-    <class 'agx.io.zcml._api.ZCMLFile'>: None
+    <class 'node.ext.zcml._api.ZCMLFile'>: None
 
 Only accepts IZCMLNode implementations.
 ::
@@ -161,9 +161,9 @@ Add simple directives.
     >>> simple.attrs['permission'] = 'zope.Public'
     
     >>> zcml.printtree()
-    <class 'agx.io.zcml._api.ZCMLFile'>: None
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+    <class 'node.ext.zcml._api.ZCMLFile'>: None
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
 
 Add complex directive.
 ::
@@ -231,12 +231,12 @@ Add another ZCML node.
     >>> simple.attrs['factory'] = '.foobar.FooBarAdapter'
     
     >>> zcml.printtree()
-    <class 'agx.io.zcml._api.ZCMLFile'>: None
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.ComplexDirective'>: ...
-        <class 'agx.io.zcml._api.SimpleDirective'>: ...
-      <class 'agx.io.zcml._api.SimpleDirective'>: ...
+    <class 'node.ext.zcml._api.ZCMLFile'>: None
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.ComplexDirective'>: ...
+        <class 'node.ext.zcml._api.SimpleDirective'>: ...
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
     
     >>> toremove = zcml.filter(tag='utility')[0]
     >>> del zcml[toremove.uuid]

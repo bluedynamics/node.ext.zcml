@@ -8,7 +8,7 @@ import zope.component
 from pprint import pprint
 from interlude import interact
 from zope.configuration.xmlconfig import XMLConfig
-import agx.io.xml
+import node.ext.xml
 
 optionflags = doctest.NORMALIZE_WHITESPACE | \
               doctest.ELLIPSIS | \
@@ -22,7 +22,7 @@ datadir = os.path.join(os.path.dirname(__file__), 'data')
 
 def test_suite():
     XMLConfig('meta.zcml', zope.component)()
-    XMLConfig('configure.zcml', agx.io.xml)()
+    XMLConfig('configure.zcml', node.ext.xml)()
     
     return unittest.TestSuite([
         doctest.DocFileSuite(
