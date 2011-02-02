@@ -1,8 +1,10 @@
-# Copyright BlueDynamics Alliance - http://bluedynamics.com
-# GNU General Public License Version 2
-
 from zope.interface import implements
-from zodict import Node
+from plumber import plumber
+from node.parts import (
+    Reference,
+    Order,
+)
+from node.base import OrderedNode
 from zope.component import getUtility
 from node.ext.xml.interfaces import IXMLFactory
 from node.ext.xml import XMLNode
@@ -12,6 +14,7 @@ from node.ext.zcml.interfaces import (
     ISimpleDirective,
     IComplexDirective,
 )
+
 
 class ZCMLAttrs(object):
     """XXX: move this to node.ext.xml. and rename to XMLAttributes.
@@ -54,11 +57,15 @@ class ZCMLAttrs(object):
             name = self.model._fq_name(name)
         self.model.model.attributes[name] = value
 
-class ZCMLNode(Node):
+
+class ZCMLNode(OrderedNode):
+    __metaclass__  = plumber
+    __plumbing__ = Reference, Order
+    
     implements(IZCMLNode)
     
     def __init__(self, name=None, parent=None, nsmap=None, model=None):
-        Node.__init__(self, name=name)
+        OrderedNode.__init__(self, name=name)
         self.model = model
         if self.model is not None:
             self.model.format = 1
@@ -90,37 +97,41 @@ class ZCMLNode(Node):
             value.model = XMLNode(name, ns=value.nsmap[ns], nsmap=value.nsmap)
             #value.model.element.nsmap = self.nsmap
             self.model[value.uuid] = value.model
-        Node.__setitem__(self, key, value)
+        OrderedNode.__setitem__(self, key, value)
     
     def __delitem__(self, key):
         todelete = self[key]
         self.model.element.remove(todelete.model.element)
-        Node.__delitem__(self, key)
+        OrderedNode.__delitem__(self, key)
     
     @property
     def attrs(self):
         return ZCMLAttrs(self)
     
     def filter(self, interface=None, tag=None, attr=None, value=None):
+        filtered = list()
+        if interface is None \
+          and tag is None \
+          and attr is None \
+          and value is None:
+            return filtered
         if interface is not None:
             items = [item for item in self.filtereditems(interface)]
         else:
             items = self.values()
-        filtered = list()
         if tag is not None:
             tag = self._fq_name(tag)
-            for item in items:
-                if item.model.element.tag == tag:
-                    filtered.append(item)
-        if attr is not None:
-            for item in items:
-                if item.attrs.get(attr) is not None:
-                    filtered.remove(item)
-        if value is not None:
-            for item in items:
-                if item.attrs.get(attr) is not None:
-                    if not item.attrs.get(attr) == value:
-                        filtered.remove(item)
+        for item in items:
+            if tag is not None:
+                if item.model.element.tag != tag:
+                    continue
+            if attr is not None:
+                if item.attrs.get(attr) is None:
+                    continue
+            if value is not None:
+                if item.attrs.get(attr) != value:
+                    continue
+            filtered.append(item)
         return filtered
     
     def _buildchildren(self, node):
@@ -138,6 +149,7 @@ class ZCMLNode(Node):
             ns, attr = name.split(':')
             return '{%s}%s' % (self.nsmap[ns], attr)
         return '{%s}%s' % (self.nsmap[None], name)
+
 
 class ZCMLFile(ZCMLNode):
     implements(IZCMLFile)
@@ -160,11 +172,13 @@ class ZCMLFile(ZCMLNode):
         self.model.root.format = 1
         self.model.root()
 
+
 class SimpleDirective(ZCMLNode):
     implements(ISimpleDirective)
     
     def __setitem__(self, key, value):
         raise NotImplementedError(u"Cannot add children to SimpleDirective.")
+
 
 class ComplexDirective(ZCMLNode):
     implements(IComplexDirective)
