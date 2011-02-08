@@ -2,7 +2,7 @@ from zope.interface import (
     Interface,
     Attribute,
 )
-from zodict.interfaces import (
+from node.interfaces import (
     INode,
     ICallableNode,
     ILeaf,
