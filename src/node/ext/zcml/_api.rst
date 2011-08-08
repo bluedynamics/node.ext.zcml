@@ -1,25 +1,23 @@
 node.ext.zcml
 =============
 
-Import nodes.
-::
+Import nodes.::
 
     >>> from node.ext.zcml import ZCMLNode
     >>> from node.ext.zcml import ZCMLFile
     >>> from node.ext.zcml import SimpleDirective
     >>> from node.ext.zcml import ComplexDirective
 
-Testdata directory.
-::
+Testdata directory.::
 
     >>> datadir
     '.../node.ext.zcml/src/node/ext/zcml/tests/data'
 
+
 Parse ZCML file
 ---------------
 
-Read existing zcml file.
-::
+Read existing zcml file.::
 
     >>> import os
     >>> existingpath = os.path.join(datadir, 'configure.zcml')
@@ -28,8 +26,7 @@ Read existing zcml file.
     
     >>> zcml = ZCMLFile(existingpath)
 
-Check NSMAP.
-::
+Check NSMAP.::
 
     >>> zcml.nsmap
     {None: 'http://namespaces.zope.org/zope', 
@@ -38,8 +35,7 @@ Check NSMAP.
     'zcml': 'http://namespaces.zope.org/zcml', 
     'browser': 'http://namespaces.zope.org/browser'}
 
-Check parsed Tree.
-::
+Check parsed Tree.::
 
     >>> zcml.printtree()
     <class 'node.ext.zcml._api.ZCMLFile'>: None
@@ -50,17 +46,16 @@ Check parsed Tree.
       <class 'node.ext.zcml._api.ComplexDirective'>: ...
         <class 'node.ext.zcml._api.SimpleDirective'>: ...
 
+
 Query ZCML nodes
 ----------------
 
-Check ``filter`` function.
-::
+Check ``filter`` function.::
 
     >>> zcml.filter()
     []
 
-Filter by tag name.
-::
+Filter by tag name.::
 
     >>> zcml.filter(tag='browser:page')
     [<SimpleDirective object '...' at ...>]
@@ -69,14 +64,12 @@ Filter by tag name.
     [<SimpleDirective object '...' at ...>, 
     <SimpleDirective object '...' at ...>]
 
-Filter by tag name and attribute name.
-::
+Filter by tag name and attribute name.::
 
     >>> zcml.filter(tag='include', attr='file')
     [<SimpleDirective object '...' at ...>]
 
-Filter by tagname, attribute name and attribute value.
-::
+Filter by tagname, attribute name and attribute value.::
 
     >>> zcml.filter(tag='include', attr='file', value='inexistent')
     []
@@ -87,8 +80,7 @@ Filter by tagname, attribute name and attribute value.
     >>> zcml.filter(tag='browser:page', attr='name', value='foo')
     [<SimpleDirective object '...' at ...>]
 
-Filter function does not work recusrive.
-::
+Filter function does not work recusrive.::
 
     >>> zcml.filter(tag='class')
     [<ComplexDirective object '...' at ...>]
@@ -99,57 +91,83 @@ Filter function does not work recusrive.
     >>> zcml.filter(tag='class')[0].filter(tag='implements')
     [<SimpleDirective object '...' at ...>]
 
+
 Write ZCML file
 ---------------
 
 Change outpath of already parsed ZCML and dump. Outpath defaults to given
-path at __init__ time.
-::
+path at __init__ time.::
 
     >>> zcml.outpath = os.path.join(datadir, 'dumped.configure.zcml')
     >>> zcml()
+    >>> file = open(zcml.outpath)
+    >>> lines = file.readlines()
+    >>> file.close()
+    
+    >> lines
+    ['<?xml version="1.0" encoding="UTF-8"?>\n', 
+    '<configure\n', 
+    '    xmlns="http://namespaces.zope.org/zope"\n', 
+    '    xmlns:zcml="http://namespaces.zope.org/zcml"\n', 
+    '    xmlns:browser="http://namespaces.zope.org/browser"\n', 
+    '    xmlns:five="http://namespaces.zope.org/five"\n', 
+    '    xmlns:cmf="http://namespaces.zope.org/cmf"\n', 
+    '    i18n_domain="agx.example">\n', 
+    '\n', 
+    '    <include package="foo.bar"/>\n', 
+    '    <include file="foo.zcml"/>\n', 
+    '\n', 
+    '    <utility factory=".foo.Bar"/>\n', 
+    '\n', 
+    '    <browser:page\n', 
+    '        for="*"\n', 
+    '        name="foo"\n', 
+    '        class=".foo.Baz"\n', 
+    '        template="foo.pt"\n', 
+    '        permission="zope.Public"/>\n', 
+    '\n', 
+    '    <class class=".foo.Baz">\n', 
+    '        <implements interface=".interfaces.IBaz"/>\n', 
+    '    </class>\n', 
+    '\n', 
+    '</configure>']
+
 
 Create ZCML file
 ----------------
 
-Path for our new file.
-::
+Path for our new file.::
 
     >>> outpath = os.path.join(datadir, 'new.zcml')
 
-Delete outfile if present due to prior test run.
-::
+Delete outfile if present due to prior test run.::
 
     >>> try:
     ...     os.remove(outpath)
     ... except OSError, e:
     ...     pass
 
-NSMAP to use. Note that you can only define namspaces due to File creation.
-::
+NSMAP to use. Note that you can only define namspaces due to File creation.::
 
     >>> nsmap = {
     ...     None: 'http://namespaces.zope.org/zope',
     ...     'browser': 'http://namespaces.zope.org/browser',
     ... }
 
-Create new ZCML.
-::
+Create new ZCML.::
 
     >>> zcml = ZCMLFile(outpath, nsmap=nsmap)
     >>> zcml.printtree()
     <class 'node.ext.zcml._api.ZCMLFile'>: None
 
-Only accepts IZCMLNode implementations.
-::
+Only accepts IZCMLNode implementations.::
 
     >>> zcml['foo'] = object()
     Traceback (most recent call last):
       ...
     ValueError: Invalid value <object object at ...>
 
-Add simple directives.
-::
+Add simple directives.::
 
     >>> simple = SimpleDirective(name='utility', parent=zcml)
     >>> simple.attrs['factory'] = 'foo.Bar'
@@ -165,65 +183,50 @@ Add simple directives.
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
 
-Add complex directive.
-::
+Add complex directive.::
     
     >>> complex = ComplexDirective(name='class', parent=zcml)
     >>> complex.attrs['class'] = '.foo.Bar'
     >>> sub = SimpleDirective(name='implements', parent=complex)
     >>> sub.attrs['interface'] = '.interfaces.IBar'
 
-Simple directives cannot contain children.
+Simple directives cannot contain children.::
 
     >>> sub['foo'] = SimpleDirective(name='fail', parent=sub)
     Traceback (most recent call last):
       ...
     NotImplementedError: Cannot add children to SimpleDirective.
 
-Write ZCML file and check contents.
-::
+Write ZCML file and check contents.::
 
     >>> zcml()
     >>> file = open(outpath, 'r')
-    >>> for line in file.readlines():
-    ...     print line
-    <?xml version="1.0" encoding="UTF-8"?>
-    <BLANKLINE>
-    <configure
-    <BLANKLINE>
-        xmlns:browser="http://namespaces.zope.org/browser"
-    <BLANKLINE>
-        xmlns="http://namespaces.zope.org/zope">
-    <BLANKLINE>
-      <utility factory="foo.Bar"/>
-    <BLANKLINE>
-      <browser:page
-    <BLANKLINE>
-          for="*"
-    <BLANKLINE>
-          name="somename"
-    <BLANKLINE>
-          template="somename.pt"
-    <BLANKLINE>
-          permission="zope.Public"/>
-    <BLANKLINE>
-      <class class=".foo.Bar">
-    <BLANKLINE>
-        <implements interface=".interfaces.IBar"/>
-    <BLANKLINE>
-      </class>
-    <BLANKLINE>
-    </configure>
-    
+    >>> lines = file.readlines()
     >>> file.close()
+    
+    >> lines
+    ['<?xml version="1.0" encoding="UTF-8"?>\n', 
+    '<configure\n', 
+    '    xmlns:browser="http://namespaces.zope.org/browser"\n', 
+    '    xmlns="http://namespaces.zope.org/zope">\n', 
+    '  <utility factory="foo.Bar"/>\n', 
+    '  <browser:page\n', 
+    '      for="*"\n', 
+    '      name="somename"\n', 
+    '      template="somename.pt"\n', 
+    '      permission="zope.Public"/>\n', 
+    '  <class class=".foo.Bar">\n', 
+    '    <implements interface=".interfaces.IBar"/>\n', 
+    '  </class>\n', 
+    '</configure>']
+
 
 Modify ZCML file
 ----------------
 
 Use already created ZCML file to modify.
 
-Add another ZCML node.
-::
+Add another ZCML node.::
 
     >>> simple = SimpleDirective(name='adapter', parent=zcml)
     >>> simple.attrs['for'] = 'interfaces.IBar'

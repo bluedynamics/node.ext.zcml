@@ -1,5 +1,7 @@
-from zope.interface import implements
+from lxml import etree
 from plumber import plumber
+from zope.interface import implements
+from node.interfaces import IRoot
 from node.parts import (
     Reference,
     Order,
@@ -48,11 +50,15 @@ class ZCMLAttrs(object):
         return key in self.model.model.attributes
     
     def __getattr__(self, name):
+        """XXX: Remove, no attribute access for attributes.
+        """
         if name.find(':') != -1:
             name = self.model._fq_name(name)
         return self.model.model.attributes[name]
     
     def __setattr__(self, name, value):
+        """XXX: Remove, no attribute access for attributes.
+        """
         if name.find(':') != -1:
             name = self.model._fq_name(name)
         self.model.model.attributes[name] = value
@@ -168,9 +174,12 @@ class ZCMLFile(ZCMLNode):
                                  ns=self.nsmap[None], nsmap=self.nsmap)
     
     def __call__(self):
-        self.model.root.outpath = self.outpath
-        self.model.root.format = 1
-        self.model.root()
+        model = self.model.root
+        with open(model.outpath, "wb") as file:
+            file.write("<?xml version=\"1.0\" encoding=\"%s\"?>\n" % 'UTF-8')
+            formatted = ZCMLFormatter().format(
+                etree.tostring(model.element, pretty_print=True))
+            file.write(formatted)
 
 
 class SimpleDirective(ZCMLNode):
@@ -182,3 +191,47 @@ class SimpleDirective(ZCMLNode):
 
 class ComplexDirective(ZCMLNode):
     implements(IComplexDirective)
+
+
+class ZCMLFormatter(object):
+    
+    def lineindent(self, line):
+        indent = 0
+        while True:
+            if line[indent] != u' ':
+                break
+            indent += 1
+        return indent
+    
+    def format(self, xml):
+        """Format already prettyprinted XML output for better human readability
+        """
+        formatted_lines = list()
+        lines = xml.split('\n')
+        for line in lines:
+            # continue if blank line
+            if not line.strip():
+                continue
+            # replace each tab with 4 spaces
+            line = line.rstrip().replace('\t', '    ')
+            if line.find(' ') > -1:
+                indent = self.lineindent(line)
+                # if line exceeds 80 chars, split up line by attributes, and
+                # align them below each other.
+                if len(line) > 80:
+                    sublines = line.strip().split(' ') # XXX
+                    formatted_lines.append(indent * ' ' + sublines[0])
+                    for subline in sublines[1:]:
+                        formatted_lines.append((indent + 4) * ' ' + subline)
+                else:
+                    formatted_lines.append(line)
+            else:
+                formatted_lines.append(line)
+        ret_lines = list()
+        # add new blank lines
+        for line in formatted_lines:
+            if line.strip().startswith('<'):
+                ret_lines.append('')
+            ret_lines.append(line)
+        ret = '\n'.join(ret_lines)
+        return ret.strip('\n')

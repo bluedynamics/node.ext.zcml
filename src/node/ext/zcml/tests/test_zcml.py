@@ -15,7 +15,7 @@ optionflags = doctest.NORMALIZE_WHITESPACE | \
               doctest.REPORT_ONLY_FIRST_FAILURE
 
 TESTFILES = [
-    '../_api.txt',
+    '../_api.rst',
 ]
 
 datadir = os.path.join(os.path.dirname(__file__), 'data')
