@@ -9,6 +9,7 @@ from node.interfaces import (
     IRoot,
 )
 
+from node.ext.directory.interfaces import IFile
 
 class IZCMLNode(INode):
     """Interface for ZCML nodes.
@@ -28,7 +29,7 @@ class IZCMLNode(INode):
         """
 
 
-class IZCMLFile(IZCMLNode, ICallableNode, IRoot):
+class IZCMLFile(IZCMLNode, ICallableNode, IRoot, IFile):
     """Interface for a ZCML file.
     """
     

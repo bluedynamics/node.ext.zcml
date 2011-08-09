@@ -17,7 +17,6 @@ from node.ext.zcml.interfaces import (
     IComplexDirective,
 )
 
-
 class ZCMLAttrs(object):
     """XXX: move this to node.ext.xml. and rename to XMLAttributes.
     """
