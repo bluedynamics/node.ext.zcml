@@ -174,7 +174,7 @@ class ZCMLFile(ZCMLNode):
     
     def __call__(self):
         model = self.model.root
-        with open(model.outpath, "wb") as file:
+        with open(self.outpath, "wb") as file:
             file.write("<?xml version=\"1.0\" encoding=\"%s\"?>\n" % 'UTF-8')
             formatted = ZCMLFormatter().format(
                 etree.tostring(model.element, pretty_print=True))
