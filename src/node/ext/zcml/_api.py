@@ -1,3 +1,4 @@
+import types
 from lxml import etree
 from plumber import plumber
 from zope.interface import implements
@@ -23,6 +24,10 @@ class ZCMLAttrs(object):
     
     def __init__(self, model):
         object.__setattr__(self, '_model', model)
+        for k, v in model.model.attributes.items():
+            val = v.split(' ')
+            val = [_ for _ in val if _]
+            model.model.attributes[k] = ' '.join(val)
     
     @property
     def model(self):
@@ -31,11 +36,17 @@ class ZCMLAttrs(object):
     def __getitem__(self, key):
         if key.find(':') != -1:
             key = self.model._fq_name(key)
-        return self.model.model.attributes[key]
+        val = self.model.model.attributes[key].split(' ')
+        val = [_ for _ in val if _]
+        if len(val) == 1:
+            return val[0]
+        return val
     
     def __setitem__(self, name, value):
         if name.find(':') != -1:
             name = self.model._fq_name(name)
+        if type(value) in (types.ListType, types.TupleType):
+            value = ' '.join(value)
         self.model.model.attributes[name] = value
     
     def get(self, key, default=None):
@@ -218,10 +229,20 @@ class ZCMLFormatter(object):
                 # if line exceeds 80 chars, split up line by attributes, and
                 # align them below each other.
                 if len(line) > 80:
-                    sublines = line.strip().split(' ') # XXX
+                    sublines = line.strip().split(' ')
                     formatted_lines.append(indent * ' ' + sublines[0])
+                    subindent = indent + 4
+                    attrintend = 0
                     for subline in sublines[1:]:
-                        formatted_lines.append((indent + 4) * ' ' + subline)
+                        formatted_lines.append(subindent * ' ' + subline)
+                        if not subline.endswith('/>') \
+                          and not subline.endswith('"'):
+                            if attrintend == 0:
+                                attrintend = subline.find('=') + 2
+                            subindent = indent + 4 + attrintend
+                        else:
+                            subindent = indent + 4
+                            attrintend = 0
                 else:
                     formatted_lines.append(line)
             else:

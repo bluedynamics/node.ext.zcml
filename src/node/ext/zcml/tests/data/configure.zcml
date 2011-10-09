@@ -25,5 +25,12 @@
         <implements interface=".interfaces.IBaz"/>
 
     </class>
+    
+    <adapter
+        for=".interfaces.IIface1
+             .interfaces.IIface2
+             .interfaces.IIface3"
+        factory=".a.B"
+        provides=".interfaces.IFace4"/>
 
 </configure>
