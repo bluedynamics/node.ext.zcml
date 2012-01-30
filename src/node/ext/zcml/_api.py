@@ -1,3 +1,4 @@
+import os
 import types
 from lxml import etree
 from plumber import plumber
@@ -8,7 +9,11 @@ from node.parts import (
     Order,
 )
 from node.base import OrderedNode
-from zope.component import getUtility
+from zope.component import (
+    getUtility,
+    provideHandler,
+)
+from node.ext.directory.interfaces import IFileAddedEvent
 from node.ext.xml.interfaces import IXMLFactory
 from node.ext.xml import XMLNode
 from node.ext.zcml.interfaces import (
@@ -170,9 +175,13 @@ class ZCMLNode(OrderedNode):
 class ZCMLFile(ZCMLNode):
     implements(IZCMLFile)
     
-    def __init__(self, path, nsmap=None):
-        ZCMLNode.__init__(self, nsmap=nsmap)
-        self.outpath = path
+    def __init__(self, name=None, parent=None, path=None, nsmap=None):
+        ZCMLNode.__init__(self, name=name, parent=parent, nsmap=nsmap)
+        # XXX: get rid of path, always use node.path
+        if path is not None:
+            self.parse(path)
+    
+    def parse(self, path):
         try:
             factory = getUtility(IXMLFactory)
             model = factory(path)
@@ -185,11 +194,20 @@ class ZCMLFile(ZCMLNode):
     
     def __call__(self):
         model = self.model.root
-        with open(self.outpath, "wb") as file:
+        with open(os.path.join(*self.path), "wb") as file:
             file.write("<?xml version=\"1.0\" encoding=\"%s\"?>\n" % 'UTF-8')
             formatted = ZCMLFormatter().format(
                 etree.tostring(model.element, pretty_print=True))
             file.write(formatted)
+
+
+def parse_zcml_file_handler(obj, event):
+    """Called, if ``ZCMLFile`` is created and added to ``Directory`` node.
+    """
+    path = os.path.join(*obj.path)
+    obj.parse(path)
+
+provideHandler(parse_zcml_file_handler, [IZCMLFile, IFileAddedEvent])
 
 
 class SimpleDirective(ZCMLNode):

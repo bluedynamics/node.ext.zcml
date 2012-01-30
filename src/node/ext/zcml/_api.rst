@@ -24,7 +24,7 @@ Read existing zcml file::
     >>> existingpath
     '.../node.ext.zcml/src/node/ext/zcml/tests/data/configure.zcml'
     
-    >>> zcml = ZCMLFile(existingpath)
+    >>> zcml = ZCMLFile(path=existingpath)
 
 Check NSMAP::
 
@@ -105,9 +105,9 @@ Write ZCML file
 Change outpath of already parsed ZCML and dump. Outpath defaults to given
 path at __init__ time::
 
-    >>> zcml.outpath = os.path.join(datadir, 'dumped.configure.zcml')
+    >>> zcml.__name__ = os.path.join(datadir, 'dumped.configure.zcml')
     >>> zcml()
-    >>> with open(zcml.outpath, 'r') as file:
+    >>> with open(zcml.name, 'r') as file:
     ...     lines = file.readlines()
     >>> lines
     ['<?xml version="1.0" encoding="UTF-8"?>\n', 
@@ -171,9 +171,9 @@ NSMAP to use. Note that you can only define namspaces due to File creation::
 
 Create new ZCML::
 
-    >>> zcml = ZCMLFile(outpath, nsmap=nsmap)
+    >>> zcml = ZCMLFile(name=outpath, path=outpath, nsmap=nsmap)
     >>> zcml.printtree()
-    <class 'node.ext.zcml._api.ZCMLFile'>: None
+    <class 'node.ext.zcml._api.ZCMLFile'>: /...
 
 Only accepts IZCMLNode implementations::
 
@@ -188,11 +188,11 @@ Add simple directives::
     >>> simple.attrs['factory'] = 'foo.Bar'
     
     >>> zcml.printtree()
-    <class 'node.ext.zcml._api.ZCMLFile'>: None
+    <class 'node.ext.zcml._api.ZCMLFile'>: /...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
     
     >>> zcml()
-    >>> with open(outpath, 'r') as file:
+    >>> with open(zcml.name, 'r') as file:
     ...     lines = file.readlines()
     >>> lines
     ['<?xml version="1.0" encoding="UTF-8"?>\n', 
@@ -211,7 +211,7 @@ Add simple directives::
     >>> simple.attrs['permission'] = 'zope.Public'
     
     >>> zcml.printtree()
-    <class 'node.ext.zcml._api.ZCMLFile'>: None
+    <class 'node.ext.zcml._api.ZCMLFile'>: /...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
 
@@ -271,7 +271,7 @@ Add another ZCML node::
     >>> simple.attrs['factory'] = '.foobar.FooBarAdapter'
     
     >>> zcml.printtree()
-    <class 'node.ext.zcml._api.ZCMLFile'>: None
+    <class 'node.ext.zcml._api.ZCMLFile'>: /...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
       <class 'node.ext.zcml._api.ComplexDirective'>: ...

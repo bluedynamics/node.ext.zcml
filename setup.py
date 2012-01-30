@@ -31,6 +31,7 @@ setup(name='node.ext.zcml',
       install_requires=[
           'setuptools',
           'node.ext.xml',
+          'node.ext.directory',
           # -*- Extra requirements: -*
       ],
       extras_require = dict(
