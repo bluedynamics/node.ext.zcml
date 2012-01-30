@@ -107,10 +107,8 @@ path at __init__ time::
 
     >>> zcml.outpath = os.path.join(datadir, 'dumped.configure.zcml')
     >>> zcml()
-    >>> file = open(zcml.outpath)
-    >>> lines = file.readlines()
-    >>> file.close()
-    
+    >>> with open(zcml.outpath, 'r') as file:
+    ...     lines = file.readlines()
     >>> lines
     ['<?xml version="1.0" encoding="UTF-8"?>\n', 
     '<configure\n', 
@@ -189,6 +187,23 @@ Add simple directives::
     >>> simple = SimpleDirective(name='utility', parent=zcml)
     >>> simple.attrs['factory'] = 'foo.Bar'
     
+    >>> zcml.printtree()
+    <class 'node.ext.zcml._api.ZCMLFile'>: None
+      <class 'node.ext.zcml._api.SimpleDirective'>: ...
+    
+    >>> zcml()
+    >>> with open(outpath, 'r') as file:
+    ...     lines = file.readlines()
+    >>> lines
+    ['<?xml version="1.0" encoding="UTF-8"?>\n', 
+    '<configure\n', 
+    '    xmlns:browser="http://namespaces.zope.org/browser"\n', 
+    '    xmlns="http://namespaces.zope.org/zope">\n', 
+    '\n', 
+    '  <utility factory="foo.Bar"/>\n', 
+    '\n', 
+    '</configure>']
+    
     >>> simple = SimpleDirective(name='browser:page', parent=zcml)
     >>> simple.attrs['for'] = ['.Iface1', '.Iface2']
     >>> simple.attrs['name'] = 'somename'
@@ -217,24 +232,29 @@ Simple directives cannot contain children::
 Write ZCML file and check contents::
 
     >>> zcml()
-    >>> file = open(outpath, 'r')
-    >>> lines = file.readlines()
-    >>> file.close()
-    
-    >> lines
+    >>> with open(outpath, 'r') as file:
+    ...     lines = file.readlines()
+    >>> lines
     ['<?xml version="1.0" encoding="UTF-8"?>\n', 
     '<configure\n', 
     '    xmlns:browser="http://namespaces.zope.org/browser"\n', 
     '    xmlns="http://namespaces.zope.org/zope">\n', 
+    '\n', 
     '  <utility factory="foo.Bar"/>\n', 
+    '\n', 
     '  <browser:page\n', 
-    '      for="*"\n', 
+    '      for=".Iface1\n', 
+    '           .Iface2"\n', 
     '      name="somename"\n', 
     '      template="somename.pt"\n', 
     '      permission="zope.Public"/>\n', 
+    '\n', 
     '  <class class=".foo.Bar">\n', 
+    '\n', 
     '    <implements interface=".interfaces.IBar"/>\n', 
+    '\n', 
     '  </class>\n', 
+    '\n', 
     '</configure>']
 
 
@@ -259,7 +279,37 @@ Add another ZCML node::
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
     
     >>> toremove = zcml.filter(tag='utility')[0]
+    >>> toremove.uuid in zcml.keys()
+    True
+    
     >>> del zcml[toremove.uuid]
     
     >>> zcml.outpath = os.path.join(datadir, 'modified.zcml')
     >>> zcml()
+    >>> with open(zcml.outpath, 'r') as file:
+    ...     lines = file.readlines()
+    >>> lines
+    ['<?xml version="1.0" encoding="UTF-8"?>\n', 
+    '<configure\n', 
+    '    xmlns:browser="http://namespaces.zope.org/browser"\n', 
+    '    xmlns="http://namespaces.zope.org/zope">\n', 
+    '\n', 
+    '  <browser:page\n', 
+    '      for=".Iface1\n', 
+    '           .Iface2"\n', 
+    '      name="somename"\n', 
+    '      template="somename.pt"\n', 
+    '      permission="zope.Public"/>\n', 
+    '\n', 
+    '  <class class=".foo.Bar">\n', 
+    '\n', 
+    '    <implements interface=".interfaces.IBar"/>\n', 
+    '\n', 
+    '  </class>\n', 
+    '\n', 
+    '  <adapter\n', 
+    '      for="interfaces.IBar"\n', 
+    '      name="myadapter"\n', 
+    '      factory=".foobar.FooBarAdapter"/>\n', 
+    '\n', 
+    '</configure>']
