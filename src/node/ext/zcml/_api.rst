@@ -139,9 +139,7 @@ path at __init__ time::
     '    </class>\n', 
     '\n', 
     '    <adapter\n', 
-    '        for=".interfaces.IIface1\n', 
-    '             .interfaces.IIface2\n', 
-    '             .interfaces.IIface3"\n', 
+    '        for=".interfaces.IIface1 .interfaces.IIface2 .interfaces.IIface3"\n', 
     '        factory=".a.B"\n', 
     '        provides=".interfaces.IFace4"/>\n', 
     '\n', 
@@ -243,8 +241,7 @@ Write ZCML file and check contents::
     '  <utility factory="foo.Bar"/>\n', 
     '\n', 
     '  <browser:page\n', 
-    '      for=".Iface1\n', 
-    '           .Iface2"\n', 
+    '      for=".Iface1 .Iface2"\n', 
     '      name="somename"\n', 
     '      template="somename.pt"\n', 
     '      permission="zope.Public"/>\n', 
@@ -313,3 +310,11 @@ Add another ZCML node::
     '      factory=".foobar.FooBarAdapter"/>\n', 
     '\n', 
     '</configure>']
+
+
+Test helper function::
+
+    >>> from node.ext.zcml._api import split_line_by_attributes
+    >>> line = '<tagname foo="a b c d e" bar="baz" />'
+    >>> split_line_by_attributes(line)
+    ['<tagname', 'foo="a b c d e"', 'bar="baz"/>']

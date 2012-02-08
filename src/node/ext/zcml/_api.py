@@ -221,6 +221,28 @@ class ComplexDirective(ZCMLNode):
     implements(IComplexDirective)
 
 
+def split_line_by_attributes(line):
+    line = line.strip()
+    if line.find(' ') == -1:
+        return [line]
+    ret = [line[0:line.find(' ')]]
+    start = 0
+    while True:
+        start = line.find('="', start)
+        if start == -1:
+            break
+        end = line.find('"', start + 2)
+        key = line[line.rfind(' ', 0, start) + 1:start]
+        val = line[start + 1:end + 1]
+        start = end
+        ret.append(key + '=' + val)
+    if line.endswith('/>'):
+        ret[-1] += '/>'
+    else:
+        ret[-1] += '>'
+    return ret
+
+
 class ZCMLFormatter(object):
     
     def lineindent(self, line):
@@ -247,7 +269,7 @@ class ZCMLFormatter(object):
                 # if line exceeds 80 chars, split up line by attributes, and
                 # align them below each other.
                 if len(line) > 80:
-                    sublines = line.strip().split(' ')
+                    sublines = split_line_by_attributes(line)
                     formatted_lines.append(indent * ' ' + sublines[0])
                     subindent = indent + 4
                     attrintend = 0
