@@ -221,6 +221,11 @@ class ComplexDirective(ZCMLNode):
     implements(IComplexDirective)
 
 
+###############################################################################
+# XXX: code below is a temporary workaround unless node.ext.xml is rewritten
+#      and provides it's own output rendering
+###############################################################################
+
 def split_line_by_attributes(line):
     line = line.strip()
     if line.find(' ') == -1:
