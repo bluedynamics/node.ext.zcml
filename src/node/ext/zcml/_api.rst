@@ -281,9 +281,13 @@ Add another ZCML node::
     
     >>> del zcml[toremove.uuid]
     
-    >>> zcml.outpath = os.path.join(datadir, 'modified.zcml')
+    >>> zcml.__name__ = os.path.join(datadir, 'modified.zcml')
     >>> zcml()
-    >>> with open(zcml.outpath, 'r') as file:
+    
+    >>> os.path.exists(zcml.name)
+    True
+    
+    >>> with open(zcml.name, 'r') as file:
     ...     lines = file.readlines()
     >>> lines
     ['<?xml version="1.0" encoding="UTF-8"?>\n', 
@@ -292,8 +296,7 @@ Add another ZCML node::
     '    xmlns="http://namespaces.zope.org/zope">\n', 
     '\n', 
     '  <browser:page\n', 
-    '      for=".Iface1\n', 
-    '           .Iface2"\n', 
+    '      for=".Iface1 .Iface2"\n', 
     '      name="somename"\n', 
     '      template="somename.pt"\n', 
     '      permission="zope.Public"/>\n', 
