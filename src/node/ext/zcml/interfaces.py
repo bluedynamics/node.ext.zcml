@@ -4,7 +4,7 @@ from zope.interface import (
 )
 from node.interfaces import (
     INode,
-    ICallableNode,
+    ICallable,
     ILeaf,
     IRoot,
 )
@@ -29,7 +29,7 @@ class IZCMLNode(INode):
         """
 
 
-class IZCMLFile(IZCMLNode, ICallableNode, IRoot, IFile):
+class IZCMLFile(IZCMLNode, ICallable, IRoot, IFile):
     """Interface for a ZCML file.
     """
     
