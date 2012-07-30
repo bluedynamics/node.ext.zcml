@@ -4,7 +4,7 @@ from lxml import etree
 from plumber import plumber
 from zope.interface import implements
 from node.interfaces import IRoot
-from node.parts import (
+from node.behaviors import (
     Reference,
     Order,
 )
