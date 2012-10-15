@@ -28,12 +28,12 @@ Read existing zcml file::
 
 Check NSMAP::
 
-    >>> zcml.nsmap
-    {None: 'http://namespaces.zope.org/zope', 
-    'cmf': 'http://namespaces.zope.org/cmf', 
-    'five': 'http://namespaces.zope.org/five', 
-    'zcml': 'http://namespaces.zope.org/zcml', 
-    'browser': 'http://namespaces.zope.org/browser'}
+    >>> sorted(zcml.nsmap.items())
+    [(None, 'http://namespaces.zope.org/zope'), 
+    ('browser', 'http://namespaces.zope.org/browser'), 
+    ('cmf', 'http://namespaces.zope.org/cmf'), 
+    ('five', 'http://namespaces.zope.org/five'), 
+    ('zcml', 'http://namespaces.zope.org/zcml')]
 
 Check parsed Tree::
 
