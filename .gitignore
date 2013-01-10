@@ -1,6 +1,6 @@
 *.pyc
 *.pyo
 src/node.ext.zcml.egg-info
-src/node/ext/zcml/tests/data/modified.zcml
-src/node/ext/zcml/tests/data/new.zcml
-src/node/ext/zcml/tests/data/dumped.configure.zcml
+src/node/ext/zcml/testing/data/modified.zcml
+src/node/ext/zcml/testing/data/new.zcml
+src/node/ext/zcml/testing/data/dumped.configure.zcml
