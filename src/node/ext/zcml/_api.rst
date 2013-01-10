@@ -11,7 +11,7 @@ Import nodes::
 Testdata directory::
 
     >>> datadir
-    '.../node.ext.zcml/src/node/ext/zcml/tests/data'
+    '.../node.ext.zcml/src/node/ext/zcml/testing/data'
 
 
 Parse ZCML file
@@ -22,7 +22,7 @@ Read existing zcml file::
     >>> import os
     >>> existingpath = os.path.join(datadir, 'configure.zcml')
     >>> existingpath
-    '.../node.ext.zcml/src/node/ext/zcml/tests/data/configure.zcml'
+    '.../node.ext.zcml/src/node/ext/zcml/testing/data/configure.zcml'
     
     >>> zcml = ZCMLFile(path=existingpath)
 
