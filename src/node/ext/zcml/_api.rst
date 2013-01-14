@@ -23,7 +23,7 @@ Read existing zcml file::
     >>> existingpath = os.path.join(datadir, 'configure.zcml')
     >>> existingpath
     '.../node.ext.zcml/src/node/ext/zcml/testing/data/configure.zcml'
-    
+
     >>> zcml = ZCMLFile(path=existingpath)
 
 Check NSMAP::
@@ -60,7 +60,7 @@ Filter by tag name::
 
     >>> zcml.filter(tag='browser:page')
     [<SimpleDirective object '...' at ...>]
-    
+
     >>> zcml.filter(tag='include')
     [<SimpleDirective object '...' at ...>, 
     <SimpleDirective object '...' at ...>]
@@ -74,10 +74,10 @@ Filter by tagname, attribute name and attribute value::
 
     >>> zcml.filter(tag='include', attr='file', value='inexistent')
     []
-    
+
     >>> zcml.filter(tag='include', attr='file', value='foo.zcml')
     [<SimpleDirective object '...' at ...>]
-    
+
     >>> zcml.filter(tag='browser:page', attr='name', value='foo')
     [<SimpleDirective object '...' at ...>]
 
@@ -85,10 +85,10 @@ Filter function does not work recusrive::
 
     >>> zcml.filter(tag='class')
     [<ComplexDirective object '...' at ...>]
-    
+
     >>> zcml.filter(tag='implements')
     []
-    
+
     >>> zcml.filter(tag='class')[0].filter(tag='implements')
     [<SimpleDirective object '...' at ...>]
 
@@ -184,11 +184,11 @@ Add simple directives::
 
     >>> simple = SimpleDirective(name='utility', parent=zcml)
     >>> simple.attrs['factory'] = 'foo.Bar'
-    
+
     >>> zcml.printtree()
     <class 'node.ext.zcml._api.ZCMLFile'>: /...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
-    
+
     >>> zcml()
     >>> with open(zcml.name, 'r') as file:
     ...     lines = file.readlines()
@@ -201,20 +201,20 @@ Add simple directives::
     '  <utility factory="foo.Bar"/>\n', 
     '\n', 
     '</configure>']
-    
+
     >>> simple = SimpleDirective(name='browser:page', parent=zcml)
     >>> simple.attrs['for'] = ['.Iface1', '.Iface2']
     >>> simple.attrs['name'] = 'somename'
     >>> simple.attrs['template'] = 'somename.pt'
     >>> simple.attrs['permission'] = 'zope.Public'
-    
+
     >>> zcml.printtree()
     <class 'node.ext.zcml._api.ZCMLFile'>: /...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
 
 Add complex directive::
-    
+
     >>> complex = ComplexDirective(name='class', parent=zcml)
     >>> complex.attrs['class'] = '.foo.Bar'
     >>> sub = SimpleDirective(name='implements', parent=complex)
@@ -266,7 +266,7 @@ Add another ZCML node::
     >>> simple.attrs['for'] = 'interfaces.IBar'
     >>> simple.attrs['name'] = 'myadapter'
     >>> simple.attrs['factory'] = '.foobar.FooBarAdapter'
-    
+
     >>> zcml.printtree()
     <class 'node.ext.zcml._api.ZCMLFile'>: /...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
@@ -274,19 +274,19 @@ Add another ZCML node::
       <class 'node.ext.zcml._api.ComplexDirective'>: ...
         <class 'node.ext.zcml._api.SimpleDirective'>: ...
       <class 'node.ext.zcml._api.SimpleDirective'>: ...
-    
+
     >>> toremove = zcml.filter(tag='utility')[0]
     >>> toremove.uuid in zcml.keys()
     True
-    
+
     >>> del zcml[toremove.uuid]
-    
+
     >>> zcml.__name__ = os.path.join(datadir, 'modified.zcml')
     >>> zcml()
-    
+
     >>> os.path.exists(zcml.name)
     True
-    
+
     >>> with open(zcml.name, 'r') as file:
     ...     lines = file.readlines()
     >>> lines

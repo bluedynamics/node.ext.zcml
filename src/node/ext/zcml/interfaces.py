@@ -8,18 +8,17 @@ from node.interfaces import (
     ILeaf,
     IRoot,
 )
-
 from node.ext.directory.interfaces import IFile
+
 
 class IZCMLNode(INode):
     """Interface for ZCML nodes.
     """
-    
     nsmap = Attribute(u"Namespace map")
-    
+
     def filter(interface=None, attr=None, value=None):
         """Return directives by filter.
-        
+
         interface
             Interface to be searched
         attr
@@ -32,7 +31,6 @@ class IZCMLNode(INode):
 class IZCMLFile(IZCMLNode, ICallable, IRoot, IFile):
     """Interface for a ZCML file.
     """
-    
     outpath = Attribute(u"Path for dumping ZCML File")
 
 

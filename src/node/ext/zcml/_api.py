@@ -2,7 +2,7 @@ import os
 import types
 from lxml import etree
 from plumber import plumber
-from zope.interface import implements
+from zope.interface import implementer
 from node.interfaces import IRoot
 from node.behaviors import (
     Reference,
@@ -23,17 +23,18 @@ from node.ext.zcml.interfaces import (
     IComplexDirective,
 )
 
+
 class ZCMLAttrs(object):
     """XXX: move this to node.ext.xml. and rename to XMLAttributes.
     """
-    
+
     def __init__(self, model):
         object.__setattr__(self, '_model', model)
         for k, v in model.model.attributes.items():
             val = v.split(' ')
             val = [_ for _ in val if _]
             model.model.attributes[k] = ' '.join(val)
-    
+
     @property
     def model(self):
         return object.__getattribute__(self, '_model')
@@ -46,31 +47,31 @@ class ZCMLAttrs(object):
         if len(val) == 1:
             return val[0]
         return val
-    
+
     def __setitem__(self, name, value):
         if name.find(':') != -1:
             name = self.model._fq_name(name)
         if type(value) in (types.ListType, types.TupleType):
             value = ' '.join(value)
         self.model.model.attributes[name] = value
-    
+
     def get(self, key, default=None):
         if key.find(':') != -1:
             key = self.model._fq_name(key)
         return self.model.model.attributes.get(key, default)
-    
+
     def __contains__(self, key):
         if key.find(':') != -1:
             key = self.model._fq_name(key)
         return key in self.model.model.attributes
-    
+
     def __getattr__(self, name):
         """XXX: Remove, no attribute access for attributes.
         """
         if name.find(':') != -1:
             name = self.model._fq_name(name)
         return self.model.model.attributes[name]
-    
+
     def __setattr__(self, name, value):
         """XXX: Remove, no attribute access for attributes.
         """
@@ -79,12 +80,11 @@ class ZCMLAttrs(object):
         self.model.model.attributes[name] = value
 
 
+@implementer(IZCMLNode)
 class ZCMLNode(OrderedNode):
     __metaclass__  = plumber
     __plumbing__ = Reference, Order
-    
-    implements(IZCMLNode)
-    
+
     def __init__(self, name=None, parent=None, nsmap=None, model=None):
         OrderedNode.__init__(self, name=name)
         self.model = model
@@ -101,7 +101,7 @@ class ZCMLNode(OrderedNode):
             self.nsmap = {
                 None: 'http://namespaces.zope.org/zope',
             }
-    
+
     def __setitem__(self, key, value):
         if not IZCMLNode.providedBy(value):
             raise ValueError(u"Invalid value %s" % value)
@@ -119,16 +119,16 @@ class ZCMLNode(OrderedNode):
             #value.model.element.nsmap = self.nsmap
             self.model[value.uuid] = value.model
         OrderedNode.__setitem__(self, key, value)
-    
+
     def __delitem__(self, key):
         todelete = self[key]
         self.model.element.remove(todelete.model.element)
         OrderedNode.__delitem__(self, key)
-    
+
     @property
     def attrs(self):
         return ZCMLAttrs(self)
-    
+
     def filter(self, interface=None, tag=None, attr=None, value=None):
         filtered = list()
         if interface is None \
@@ -154,7 +154,7 @@ class ZCMLNode(OrderedNode):
                     continue
             filtered.append(item)
         return filtered
-    
+
     def _buildchildren(self, node):
         for child in node.model.values():
             if child.values():
@@ -164,7 +164,7 @@ class ZCMLNode(OrderedNode):
             else:
                 simple = SimpleDirective(model=child)
                 node[simple.uuid] = simple
-    
+
     def _fq_name(self, name):
         if name.find(':') != -1:
             ns, attr = name.split(':')
@@ -172,15 +172,15 @@ class ZCMLNode(OrderedNode):
         return '{%s}%s' % (self.nsmap[None], name)
 
 
+@implementer(IZCMLFile)
 class ZCMLFile(ZCMLNode):
-    implements(IZCMLFile)
-    
+
     def __init__(self, name=None, parent=None, path=None, nsmap=None):
         ZCMLNode.__init__(self, name=name, parent=parent, nsmap=nsmap)
         # XXX: get rid of path, always use node.path
         if path is not None:
             self.parse(path)
-    
+
     def parse(self, path):
         try:
             factory = getUtility(IXMLFactory)
@@ -191,7 +191,7 @@ class ZCMLFile(ZCMLNode):
         except IOError, e:
             self.model = XMLNode('configure', path=path,
                                  ns=self.nsmap[None], nsmap=self.nsmap)
-    
+
     def __call__(self):
         model = self.model.root
         with open(os.path.join(*self.path), "wb") as file:
@@ -207,24 +207,27 @@ def parse_zcml_file_handler(obj, event):
     path = os.path.join(*obj.path)
     obj.parse(path)
 
+
 provideHandler(parse_zcml_file_handler, [IZCMLFile, IFileAddedEvent])
 
 
+@implementer(ISimpleDirective)
 class SimpleDirective(ZCMLNode):
-    implements(ISimpleDirective)
-    
+
     def __setitem__(self, key, value):
         raise NotImplementedError(u"Cannot add children to SimpleDirective.")
 
 
+@implementer(IComplexDirective)
 class ComplexDirective(ZCMLNode):
-    implements(IComplexDirective)
+    pass
 
 
 ###############################################################################
 # XXX: code below is a temporary workaround unless node.ext.xml is rewritten
 #      and provides it's own output rendering
 ###############################################################################
+
 
 def split_line_by_attributes(line):
     line = line.strip()
@@ -249,7 +252,7 @@ def split_line_by_attributes(line):
 
 
 class ZCMLFormatter(object):
-    
+
     def lineindent(self, line):
         indent = 0
         while True:
@@ -257,7 +260,7 @@ class ZCMLFormatter(object):
                 break
             indent += 1
         return indent
-    
+
     def format(self, xml):
         """Format already prettyprinted XML output for better human readability
         """
