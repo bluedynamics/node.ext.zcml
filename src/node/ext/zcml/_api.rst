@@ -13,13 +13,20 @@ Testdata directory::
     >>> datadir
     '.../node.ext.zcml/src/node/ext/zcml/testing/data'
 
+Revove files from prevous test run::
+
+    >>> import os
+    >>> for file in ['new.zcml', 'modified.zcml', 'dumped.configure.zcml']:
+    ...     path = os.path.join(datadir, 'modified.zcml')
+    ...     if os.path.exists(path):
+    ...         os.remove(path)
+
 
 Parse ZCML file
 ---------------
 
 Read existing zcml file::
 
-    >>> import os
     >>> existingpath = os.path.join(datadir, 'configure.zcml')
     >>> existingpath
     '.../node.ext.zcml/src/node/ext/zcml/testing/data/configure.zcml'
