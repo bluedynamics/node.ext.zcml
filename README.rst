@@ -1,9 +1,25 @@
-This Package is part of **AGX**. See `<http://agx.me>`_ for Details.
+node.ext.zcml
+=============
+
+ZCML file abstraction based on nodes.
+
+
+Usage
+=====
+
+write me (or read tests)
+
+
+Contributors
+============
+
+- Robert Niederreiter <rnix [at] squarewave [dot] at>
+
 
 Changes
 =======
 
-1.0 (svn)
----------
+0.1
+---
 
-  -make it work
+- initial
